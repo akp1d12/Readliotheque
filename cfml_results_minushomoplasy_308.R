@@ -1,5 +1,7 @@
-# ClonalFrameML results
-# Planned usage: Rscript cfml_results.R ...
+#This is an Rscript which pre-requisites installation of the Ape and Phangorn packages
+#It was created by Xavier Didelot and Danny Wilson as part of the ClonalFrameML package
+#It has been modified on line number 308 to silence homoplasy
+#execute from a terminal with command Rscript cfml_results~yourname~.R
 help = paste(
 "cfml_results.R summarizes the results of a ClonalFrameML analysis",
 "Daniel Wilson (2014)",
