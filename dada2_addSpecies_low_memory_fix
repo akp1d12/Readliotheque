@@ -1,0 +1,21 @@
+#This is to be executed after the assignTaxonomy functionif R is aborting during the species assignation step due to not enough system memory
+#Have tax_table (large)
+#use assignTaxonomy to generate taxonomy during dada2 pipeline
+#R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
+#dada2 version 1.20.0
+******************************************************************************************
+#Free unused R memory
+gc()
+
+#set chunk (memory component) size
+chunk.size <- 4000
+
+#split large taxa table into chunks
+chunks <- split(c(1:nrow(taxa)),
+                sort(c(1:nrow(taxa))%%ceiling(nrow(taxa)/chunk.size)))
+                
+#assign species to chunks
+chunks.species <- lapply(chunks, function(x){return(addSpecies(taxa[x,],
+   refFasta = "silva_species_assignment_v138.1.fa.gz", verbose = TRUE))})
+#bring speciated chunks back into one taxonomy Table
+taxa_species <- do.call(rbind, chunks.species)
