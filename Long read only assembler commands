@@ -1,0 +1,15 @@
+#Combine MinION sequenced and trimmed long reads into one read
+cat *trimmed.fastq > dataset_trimmed.fastq
+
+# Raven Assembler v1.50
+raven -t number_threads dataset_trimmed.fastq > [prefix_output_files].fasta
+
+#Miniasm v 0.3_r179/Minipolish v0.1.2
+1. minimap2 -x ava-ont -t number_threads dataset_trimmed.fastq dataset_trimmed.fastq | gzip -1 > [prefix_input_files].paf.gz
+2. miniasm_and_minipolish.sh -f dataset_trimmed.fastq number_threads > [prefix_input_files].gfa
+3. awk '/^S/{print ">"$2"\n"$3}' [prefix_input_files].gfa | fold > [prefix_output_files].fasta
+
+#Flye v2.8.3
+flye --nano-raw dataset_trimmed.fastq --out-dir flye_assemblies/barcode5  --threads number_threads
+
+
