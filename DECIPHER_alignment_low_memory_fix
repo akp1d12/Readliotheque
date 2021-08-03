@@ -1,0 +1,42 @@
+#Large sequence alignment may throttle R due to memory issues, this workflow resolves that but involves using a tree builder outside of R
+
+#This assumes a sequence table has been generated with dada2 and pruned of Bimeras
+#Contains object seqtab.nochim
+
+#load DECIPHER package v2.20.0 which requires Biostrings (needed to make DNA stringset object)
+seqs <- getSequences(seqtab.nochim)
+
+#rename seqs
+names(seqs) <- seqs
+
+#rename seqs to "dna" for use with guide tree function
+dna <- seqs
+rm(seqs)
+
+#Create chained guide tree
+gT <- lapply(order(width(dna), decreasing=TRUE),
+       function(x) {
+               attr(x, "height") <- 0
+               attr(x, "label") <- names(dna)[x]
+               attr(x, "members") <- 1L
+               attr(x, "leaf") <- TRUE
+               x
+         })
+attr(gT, "height") <- 0.5
+attr(gT, "members") <- length(dna)
+class(gT) <- "dendogram"
+
+#align sequence with guide tree as input
+aln_dna <- AlignSeqs(dna,
+           guideTree=gT,
+           iterations=0,
+           refinements=0)
+      
+#save alignment
+write.fasta(aln_dna, "aln.fasta")
+
+
+#Create ML tree outside of R using FastTree or RaxML
+#This used FastTree v2.1.10 Double precision (No SSE3)
+fasttree -gtr -nt -gamma aln.fasta > 16s.tree
+
